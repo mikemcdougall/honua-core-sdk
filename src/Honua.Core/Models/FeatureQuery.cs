@@ -1,196 +1,524 @@
-// Copyright (c) 2026 Honua Project Contributors
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// Copyright (c) Honua. All rights reserved.
+// Licensed under the Apache License 2.0. See LICENSE in the project root.
 
 using System.Collections.Immutable;
-using NetTopologySuite.Geometries;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Honua.Core.Models;
 
 /// <summary>
-/// Domain model for feature queries.
-/// Shared between server query processing and mobile client building.
+/// Represents a query specification for features
 /// </summary>
-public class FeatureQuery
+public readonly record struct FeatureQuery
 {
     /// <summary>
-    /// SQL-like where clause for attribute filtering.
+    /// WHERE clause filter expression (GeoServices REST SQL syntax)
     /// </summary>
-    public string? Where { get; set; }
+    public string? Where { get; init; }
 
     /// <summary>
-    /// Specific object IDs to query for.
+    /// Optional list of object IDs to filter by
     /// </summary>
-    public ImmutableArray<long>? ObjectIds { get; set; }
+    public ImmutableArray<long>? ObjectIds { get; init; }
 
     /// <summary>
-    /// Fields to include in the response. If null, all fields are returned.
+    /// Fields to return (null means all fields)
     /// </summary>
-    public ImmutableArray<string>? OutFields { get; set; }
+    public ImmutableArray<string>? OutFields { get; init; }
 
     /// <summary>
-    /// Whether to include geometry in the response.
+    /// Spatial filter for geometry-based queries
     /// </summary>
-    public bool ReturnGeometry { get; set; } = true;
+    public SpatialFilter? SpatialFilter { get; init; }
 
     /// <summary>
-    /// Spatial filter for geographic queries.
+    /// SRID of the stored layer geometry (used for spatial filter transforms and output CRS handling)
     /// </summary>
-    public SpatialFilter? SpatialFilter { get; set; }
+    public int? SpatialReferenceSrid { get; init; }
 
     /// <summary>
-    /// Result offset for pagination.
+    /// Optional output SRID for geometry transformation in query results
     /// </summary>
-    public int? Offset { get; set; }
+    public int? OutputSrid { get; init; }
 
     /// <summary>
-    /// Maximum number of features to return.
+    /// Temporal filter for time-based queries
     /// </summary>
-    public int? Count { get; set; }
+    public TemporalFilter? TemporalFilter { get; init; }
 
     /// <summary>
-    /// Field name to order results by.
+    /// Include features without geometry when a spatial filter is provided
     /// </summary>
-    public string? OrderBy { get; set; }
+    public bool IncludeNullGeometry { get; init; }
 
     /// <summary>
-    /// Whether to return only distinct features.
+    /// Number of records to skip for pagination
     /// </summary>
-    public bool ReturnDistinct { get; set; }
+    public int? Offset { get; init; }
 
     /// <summary>
-    /// Statistics to calculate on the query results.
+    /// Maximum number of records to return
     /// </summary>
-    public ImmutableArray<StatisticDefinition>? Statistics { get; set; }
+    public int? Limit { get; init; }
 
     /// <summary>
-    /// Fields to group statistics by.
+    /// Order by clauses for sorting results (e.g., "name asc", "population desc")
     /// </summary>
-    public ImmutableArray<string>? GroupBy { get; set; }
+    public ImmutableArray<OrderByClause>? OrderBy { get; init; }
+
+    /// <summary>
+    /// Whether to return only distinct rows (SQL DISTINCT)
+    /// </summary>
+    public bool Distinct { get; init; }
+
+    /// <summary>
+    /// Aggregate statistic definitions for statistics queries (outStatistics)
+    /// </summary>
+    public ImmutableArray<StatisticDefinition>? OutStatistics { get; init; }
+
+    /// <summary>
+    /// Fields to group by for statistics queries (groupByFieldsForStatistics)
+    /// </summary>
+    public ImmutableArray<string>? GroupByFields { get; init; }
+
+    /// <summary>
+    /// Top features filter for queryTopFeatures operations (window-function partitioning)
+    /// </summary>
+    public TopFilter? TopFilter { get; init; }
+
+    /// <summary>
+    /// Creates a simple WHERE clause query
+    /// </summary>
+    /// <param name="where">WHERE clause expression</param>
+    /// <returns>Feature query instance</returns>
+    public static FeatureQuery WithWhere(string where)
+        => new() { Where = where };
+
+    /// <summary>
+    /// Creates a query with pagination
+    /// </summary>
+    /// <param name="offset">Number of records to skip</param>
+    /// <param name="limit">Maximum number of records</param>
+    /// <returns>Feature query instance</returns>
+    public static FeatureQuery WithPaging(int offset, int limit)
+        => new() { Offset = offset, Limit = limit };
+
+    /// <summary>
+    /// Creates a spatial query
+    /// </summary>
+    /// <param name="spatialFilter">Spatial filter specification</param>
+    /// <returns>Feature query instance</returns>
+    public static FeatureQuery WithSpatialFilter(SpatialFilter spatialFilter)
+        => new() { SpatialFilter = spatialFilter };
 }
 
 /// <summary>
-/// Spatial filtering criteria for feature queries.
+/// Temporal filtering criteria
 /// </summary>
-public class SpatialFilter
+public readonly record struct TemporalFilter
 {
     /// <summary>
-    /// Geometry to use for spatial filtering.
+    /// Name of the temporal property to filter on
     /// </summary>
-    public required Geometry FilterGeometry { get; set; }
+    public required string PropertyName { get; init; }
 
     /// <summary>
-    /// Type of spatial relationship to test.
+    /// Type of the temporal property
     /// </summary>
-    public SpatialRelationship Relationship { get; set; } = SpatialRelationship.Intersects;
+    public required TemporalPropertyType PropertyType { get; init; }
 
     /// <summary>
-    /// Buffer distance to apply to the filter geometry.
+    /// Inclusive start of the temporal interval (null for open start)
     /// </summary>
-    public double? BufferDistance { get; set; }
+    public DateTimeOffset? Start { get; init; }
 
     /// <summary>
-    /// Units for the buffer distance.
+    /// Inclusive end of the temporal interval (null for open end)
     /// </summary>
-    public DistanceUnit? BufferUnit { get; set; }
-
-    /// <summary>
-    /// Spatial reference system for the filter geometry.
-    /// </summary>
-    public SpatialReference? SpatialReference { get; set; }
+    public DateTimeOffset? End { get; init; }
 }
 
 /// <summary>
-/// Statistical calculation definition.
+/// Temporal property type for filtering
 /// </summary>
-public class StatisticDefinition
+public enum TemporalPropertyType
 {
     /// <summary>
-    /// Field to calculate statistics on.
+    /// DateTime values with time and timezone information
     /// </summary>
-    public required string FieldName { get; set; }
+    DateTime,
 
     /// <summary>
-    /// Type of statistic to calculate.
+    /// Date values without time component
     /// </summary>
-    public StatisticType StatisticType { get; set; }
-
-    /// <summary>
-    /// Output field name for the statistic result.
-    /// </summary>
-    public string? OutputFieldName { get; set; }
+    Date
 }
 
 /// <summary>
-/// Supported spatial relationships for filtering.
+/// Represents spatial filtering criteria
+/// </summary>
+public readonly record struct SpatialFilter
+{
+    /// <summary>
+    /// Geometry for spatial filtering in Well-Known Binary (WKB) format
+    /// </summary>
+    public required byte[] Geometry { get; init; }
+
+    /// <summary>
+    /// SRID of the filter geometry (null if unspecified)
+    /// </summary>
+    public int? Srid { get; init; }
+
+    /// <summary>
+    /// Spatial relationship type
+    /// </summary>
+    public required SpatialRelationship SpatialRelationship { get; init; }
+
+    /// <summary>
+    /// Distance value for distance-based spatial queries (WithinDistance, BeyondDistance).
+    /// The unit is determined by the DistanceUnit property.
+    /// </summary>
+    public double? Distance { get; init; }
+
+    /// <summary>
+    /// Unit for distance measurements. Defaults to Meters.
+    /// </summary>
+    public DistanceUnit DistanceUnit { get; init; }
+
+    /// <summary>
+    /// Number of nearest neighbors to return for KNN queries.
+    /// Only applicable when SpatialRelationship is NearestNeighbor.
+    /// </summary>
+    public int? NearestCount { get; init; }
+
+    /// <summary>
+    /// Whether to include the computed distance value in results for KNN queries.
+    /// </summary>
+    public bool ReturnDistance { get; init; }
+
+    /// <summary>
+    /// Creates a spatial filter
+    /// </summary>
+    /// <param name="geometry">Filter geometry in WKB format</param>
+    /// <param name="spatialRelationship">Type of spatial relationship</param>
+    /// <param name="srid">SRID of the filter geometry</param>
+    /// <returns>Spatial filter instance</returns>
+    public static SpatialFilter Create(byte[] geometry, SpatialRelationship spatialRelationship, int? srid = null)
+        => new() { Geometry = geometry, SpatialRelationship = spatialRelationship, Srid = srid };
+
+    /// <summary>
+    /// Creates a distance-based spatial filter
+    /// </summary>
+    /// <param name="geometry">Filter geometry in WKB format</param>
+    /// <param name="distance">Distance value</param>
+    /// <param name="unit">Distance unit (defaults to Meters)</param>
+    /// <param name="withinDistance">True for within distance, false for beyond distance</param>
+    /// <param name="srid">SRID of the filter geometry</param>
+    /// <returns>Spatial filter instance</returns>
+    public static SpatialFilter CreateDistanceFilter(
+        byte[] geometry,
+        double distance,
+        DistanceUnit unit = DistanceUnit.Meters,
+        bool withinDistance = true,
+        int? srid = null)
+        => new()
+        {
+            Geometry = geometry,
+            Srid = srid,
+            SpatialRelationship = withinDistance ? SpatialRelationship.WithinDistance : SpatialRelationship.BeyondDistance,
+            Distance = distance,
+            DistanceUnit = unit
+        };
+
+    /// <summary>
+    /// Creates a K-Nearest Neighbor (KNN) spatial filter
+    /// </summary>
+    /// <param name="geometry">Filter geometry in WKB format</param>
+    /// <param name="count">Number of nearest neighbors to return</param>
+    /// <param name="returnDistance">Whether to include distance values in results</param>
+    /// <param name="srid">SRID of the filter geometry</param>
+    /// <returns>Spatial filter instance</returns>
+    public static SpatialFilter CreateKnnFilter(byte[] geometry, int count, bool returnDistance = false, int? srid = null)
+        => new()
+        {
+            Geometry = geometry,
+            Srid = srid,
+            SpatialRelationship = SpatialRelationship.NearestNeighbor,
+            NearestCount = count,
+            ReturnDistance = returnDistance
+        };
+}
+
+/// <summary>
+/// Represents an order by clause for sorting results
+/// </summary>
+public readonly record struct OrderByClause
+{
+    /// <summary>
+    /// Field name to sort by
+    /// </summary>
+    public required string Field { get; init; }
+
+    /// <summary>
+    /// Sort direction (true = ascending, false = descending)
+    /// </summary>
+    public bool Ascending { get; init; } = true;
+
+    /// <summary>
+    /// Field type metadata for typed ordering (null when unknown)
+    /// </summary>
+    public FieldType? FieldType { get; init; }
+
+    /// <summary>
+    /// Initializes a new OrderByClause
+    /// </summary>
+    public OrderByClause()
+    {
+        Ascending = true;
+    }
+
+    /// <summary>
+    /// Creates an ascending order by clause
+    /// </summary>
+    /// <param name="field">Field to sort by</param>
+    /// <returns>Order by clause instance</returns>
+    public static OrderByClause Asc(string field)
+        => new() { Field = field, Ascending = true };
+
+    /// <summary>
+    /// Creates a descending order by clause
+    /// </summary>
+    /// <param name="field">Field to sort by</param>
+    /// <returns>Order by clause instance</returns>
+    public static OrderByClause Desc(string field)
+        => new() { Field = field, Ascending = false };
+}
+
+/// <summary>
+/// Spatial relationship types for filtering
 /// </summary>
 public enum SpatialRelationship
 {
+    /// <summary>
+    /// Features that intersect the filter geometry
+    /// </summary>
     Intersects,
-    Contains,
+
+    /// <summary>
+    /// Features completely within the filter geometry
+    /// </summary>
     Within,
-    Crosses,
-    Touches,
-    Overlaps,
-    Disjoint,
-    Equals,
+
+    /// <summary>
+    /// Features that contain the filter geometry
+    /// </summary>
+    Contains,
+
+    /// <summary>
+    /// Features whose envelope intersects the filter geometry
+    /// </summary>
     EnvelopeIntersects,
+
+    /// <summary>
+    /// Features that cross the filter geometry (lines through polygons)
+    /// </summary>
+    Crosses,
+
+    /// <summary>
+    /// Features that touch but don't overlap the filter geometry (adjacent parcels)
+    /// </summary>
+    Touches,
+
+    /// <summary>
+    /// Features that partially overlap the filter geometry
+    /// </summary>
+    Overlaps,
+
+    /// <summary>
+    /// Features that don't touch the filter geometry at all
+    /// </summary>
+    Disjoint,
+
+    /// <summary>
+    /// Features that are geometrically identical to the filter geometry
+    /// </summary>
+    Equals,
+
+    /// <summary>
+    /// Features within a specified distance of the filter geometry (ST_DWithin)
+    /// </summary>
     WithinDistance,
+
+    /// <summary>
+    /// Features beyond a specified distance from the filter geometry
+    /// </summary>
     BeyondDistance,
+
+    /// <summary>
+    /// K-Nearest Neighbor query - returns K closest features to the filter geometry
+    /// </summary>
     NearestNeighbor
 }
 
 /// <summary>
-/// Distance units for spatial operations.
+/// Units for distance measurements in spatial queries
 /// </summary>
 public enum DistanceUnit
 {
+    /// <summary>
+    /// Distance in meters (default for geography types)
+    /// </summary>
     Meters,
+
+    /// <summary>
+    /// Distance in feet
+    /// </summary>
     Feet,
+
+    /// <summary>
+    /// Distance in kilometers
+    /// </summary>
     Kilometers,
+
+    /// <summary>
+    /// Distance in miles
+    /// </summary>
     Miles
 }
 
 /// <summary>
-/// Types of statistical calculations.
+/// Top features filter for queryTopFeatures operations (window-function partitioning)
+/// </summary>
+public readonly record struct TopFilter
+{
+    /// <summary>
+    /// Number of top features per partition
+    /// </summary>
+    public required int Count { get; init; }
+
+    /// <summary>
+    /// Field to partition by for top features query
+    /// </summary>
+    public required string PartitionBy { get; init; }
+
+    /// <summary>
+    /// Field to order by within each partition
+    /// </summary>
+    public required string OrderBy { get; init; }
+
+    /// <summary>
+    /// Order direction (true = ascending, false = descending)
+    /// </summary>
+    public bool Ascending { get; init; } = true;
+
+    /// <summary>
+    /// Initializes a new TopFilter
+    /// </summary>
+    public TopFilter()
+    {
+        Ascending = true;
+    }
+}
+
+/// <summary>
+/// Statistic definition for aggregate queries
+/// </summary>
+public readonly record struct StatisticDefinition
+{
+    /// <summary>
+    /// Field name to calculate statistics on
+    /// </summary>
+    public required string FieldName { get; init; }
+
+    /// <summary>
+    /// Type of statistic to calculate
+    /// </summary>
+    public required StatisticType StatisticType { get; init; }
+
+    /// <summary>
+    /// Output alias for the statistic (optional, defaults to field name)
+    /// </summary>
+    public string? OutStatisticFieldName { get; init; }
+}
+
+/// <summary>
+/// Types of statistics that can be calculated
 /// </summary>
 public enum StatisticType
 {
+    /// <summary>
+    /// Count of non-null values
+    /// </summary>
     Count,
+
+    /// <summary>
+    /// Sum of all values
+    /// </summary>
     Sum,
-    Min,
-    Max,
+
+    /// <summary>
+    /// Average of all values
+    /// </summary>
     Average,
+
+    /// <summary>
+    /// Minimum value
+    /// </summary>
+    Min,
+
+    /// <summary>
+    /// Maximum value
+    /// </summary>
+    Max,
+
+    /// <summary>
+    /// Standard deviation
+    /// </summary>
     StandardDeviation,
+
+    /// <summary>
+    /// Variance
+    /// </summary>
     Variance
 }
 
 /// <summary>
-/// Spatial reference system definition.
+/// Field type enumeration for metadata
 /// </summary>
-public class SpatialReference
+public enum FieldType
 {
     /// <summary>
-    /// Well-Known ID (EPSG code).
+    /// Integer field type
     /// </summary>
-    public int? WKID { get; set; }
+    Integer,
 
     /// <summary>
-    /// Latest Well-Known ID.
+    /// Floating point field type
     /// </summary>
-    public int? LatestWKID { get; set; }
+    Double,
 
     /// <summary>
-    /// Well-Known Text definition.
+    /// String/text field type
     /// </summary>
-    public string? WKT { get; set; }
+    String,
+
+    /// <summary>
+    /// Date/time field type
+    /// </summary>
+    DateTime,
+
+    /// <summary>
+    /// Boolean field type
+    /// </summary>
+    Boolean,
+
+    /// <summary>
+    /// Geometry field type
+    /// </summary>
+    Geometry,
+
+    /// <summary>
+    /// GUID/UUID field type
+    /// </summary>
+    Guid
 }
