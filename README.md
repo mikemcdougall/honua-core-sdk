@@ -1,9 +1,9 @@
-# Honua.Core
+# Honua.Core.Sdk
 
-[![NuGet Version](https://img.shields.io/nuget/v/Honua.Core.svg)](https://www.nuget.org/packages/Honua.Core)
+[![NuGet Version](https://img.shields.io/nuget/v/Honua.Core.Sdk.svg)](https://www.nuget.org/packages/Honua.Core.Sdk)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-**Honua.Core** is the foundational .NET library for building applications with Honua geospatial services. This library provides core domain models, gRPC conversion utilities, and shared abstractions for both server-side and mobile client implementations.
+**Honua.Core.Sdk** is the core runtime SDK for building production applications with Honua geospatial services. This library provides pure runtime capabilities including feature queries, spatial filtering, and transport abstractions without any administrative functionality.
 
 ## 🚀 Features
 
@@ -19,18 +19,20 @@
 Install via NuGet Package Manager:
 
 ```bash
-dotnet add package Honua.Core
+dotnet add package Honua.Core.Sdk
 ```
 
 Or via Package Manager Console:
 
 ```powershell
-Install-Package Honua.Core
+Install-Package Honua.Core.Sdk
 ```
 
 ## 🏗️ Architecture
 
-Honua.Core is designed to be the shared foundation for:
+**Functionality-First Design**: This SDK focuses exclusively on runtime capabilities. For administrative functionality like service management, bulk operations, and user administration, use [Honua.Admin.Tools](https://github.com/mikemcdougall/honua-admin-tools).
+
+Honua.Core.Sdk is designed to be the runtime foundation for:
 
 - **Server Applications**: Core domain logic and gRPC message conversion
 - **Mobile Applications**: Feature query building and spatial operations
@@ -105,14 +107,22 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 ## 🔗 Related Projects
 
-- **[honua-server](https://github.com/mikemcdougall/honua-server)**: Server implementation using Honua.Core
-- **[geospatial-grpc](https://github.com/mikemcdougall/geospatial-grpc)**: Protocol Buffer definitions for geospatial services
-- **[honua-mobile](https://github.com/mikemcdougall/honua-mobile)**: .NET MAUI mobile SDK using Honua.Core
+**Runtime SDKs (Apache 2.0)**:
+- **[honua-mobile-sdk](https://github.com/mikemcdougall/honua-mobile-sdk)**: .NET MAUI mobile SDK
+- **[honua-js-sdk](https://github.com/mikemcdougall/honua-js-sdk)**: JavaScript runtime SDK (future)
+- **[honua-python-sdk](https://github.com/mikemcdougall/honua-python-sdk)**: Python runtime SDK (future)
+
+**Administrative Tools (Apache 2.0)**:
+- **[honua-admin-tools](https://github.com/mikemcdougall/honua-admin-tools)**: Multi-language admin tooling
+
+**Infrastructure (Mixed Licensing)**:
+- **[honua-server](https://github.com/mikemcdougall/honua-server)**: Server implementation (ELv2)
+- **[geospatial-grpc](https://github.com/mikemcdougall/geospatial-grpc)**: Open gRPC protocol definitions (Apache 2.0)
 
 ## 📞 Support
 
-- [Issues](https://github.com/mikemcdougall/honua-core/issues): Bug reports and feature requests
-- [Discussions](https://github.com/mikemcdougall/honua-core/discussions): Community support and questions
+- [Issues](https://github.com/mikemcdougall/honua-core-sdk/issues): Bug reports and feature requests
+- [Discussions](https://github.com/mikemcdougall/honua-core-sdk/discussions): Community support and questions
 
 ---
 
