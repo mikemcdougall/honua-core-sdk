@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net10.0;net10.0-android;net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('linux'))">net10.0</TargetFrameworks>
+    <UseMaui>true</UseMaui>
+    <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <PackageId>Honua.Core</PackageId>
+    <Version>1.0.0</Version>
+    <Description>Core .NET library for building applications with Honua geospatial services</Description>
+    <Authors>Honua Project Contributors</Authors>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/mikemcdougall/honua-core</RepositoryUrl>
+    <PackageTags>geospatial;grpc;gis;mapping;spatial;mobile;maui;core</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Core dependencies available on all platforms -->
+    <PackageReference Include="Google.Protobuf" Version="3.28.2" />
+    <PackageReference Include="Grpc.Core.Api" Version="2.67.0" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.67.0" />
+    <PackageReference Include="NetTopologySuite" Version="2.5.0" />
+    <PackageReference Include="System.Collections.Immutable" Version="9.0.0" />
+  </ItemGroup>
+
+  <!-- Platform-specific dependencies -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <!-- Server-specific packages -->
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(TargetFramework.Contains('android')) OR $(TargetFramework.Contains('ios')) OR $(TargetFramework.Contains('maccatalyst'))">
+    <!-- Mobile-specific packages -->
+    <PackageReference Include="Microsoft.Maui.Controls" Version="10.0.20" />
+    <PackageReference Include="Microsoft.Maui.Essentials" Version="10.0.0" />
+  </ItemGroup>
+
+  <!-- gRPC dependency from geospatial standard -->
+  <!-- TODO: Uncomment when geospatial-grpc package is published -->
+  <!--<ItemGroup>
+    <PackageReference Include="buf.build.geospatial.standard" Version="0.2.0" />
+  </ItemGroup>-->
+
+</Project>
