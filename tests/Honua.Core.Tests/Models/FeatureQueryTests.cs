@@ -25,8 +25,7 @@ public class FeatureQueryTests
         var query = new FeatureQuery();
 
         // Assert
-        Assert.True(query.ReturnGeometry);
-        Assert.False(query.ReturnDistinct);
+        Assert.False(query.Distinct);
         Assert.Null(query.Where);
         Assert.Null(query.ObjectIds);
         Assert.Null(query.OutFields);
