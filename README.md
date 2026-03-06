@@ -31,13 +31,11 @@ Install-Package Honua.Core.Sdk
 
 ## 🏗️ Functionality-First Architecture
 
-<<<<<<< HEAD
 **Functionality-First Design**: This SDK focuses exclusively on runtime capabilities. For administrative functionality like service management, bulk operations, and user administration, use [Honua.Admin.Tools](https://github.com/mikemcdougall/honua-admin-tools).
 
-Honua.Core.Sdk is designed to be the runtime foundation for:
-=======
 The Honua ecosystem follows a **functionality-first architecture** with clear separation of concerns:
->>>>>>> 19af7f4acb162a4399d7b0d22a9166893bf78b93
+
+Honua.Core.Sdk is designed to be the runtime foundation for:
 
 ### Runtime vs Admin Separation
 
@@ -190,23 +188,17 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 ## 🔗 Related Projects
 
-<<<<<<< HEAD
 **Runtime SDKs (Apache 2.0)**:
-- **[honua-mobile-sdk](https://github.com/mikemcdougall/honua-mobile-sdk)**: .NET MAUI mobile SDK
+- **[honua-mobile-sdk](https://github.com/mikemcdougall/honua-mobile-sdk)**: .NET MAUI mobile SDK (future)
 - **[honua-js-sdk](https://github.com/mikemcdougall/honua-js-sdk)**: JavaScript runtime SDK (future)
 - **[honua-python-sdk](https://github.com/mikemcdougall/honua-python-sdk)**: Python runtime SDK (future)
 
 **Administrative Tools (Apache 2.0)**:
-- **[honua-admin-tools](https://github.com/mikemcdougall/honua-admin-tools)**: Multi-language admin tooling
+- **[honua-admin-tools](https://github.com/mikemcdougall/honua-admin-tools)**: Multi-language admin tooling for service management
 
 **Infrastructure (Mixed Licensing)**:
 - **[honua-server](https://github.com/mikemcdougall/honua-server)**: Server implementation (ELv2)
 - **[geospatial-grpc](https://github.com/mikemcdougall/geospatial-grpc)**: Open gRPC protocol definitions (Apache 2.0)
-=======
-- **[honua-admin-tools](https://github.com/mikemcdougall/honua-admin-tools)**: Multi-language admin tooling for service management
-- **[geospatial-grpc](https://github.com/mikemcdougall/geospatial-grpc)**: Protocol Buffer definitions for geospatial services
-- **[honua-server](https://github.com/mikemcdougall/honua-server)**: Server implementation
->>>>>>> 19af7f4acb162a4399d7b0d22a9166893bf78b93
 
 ## 📞 Support
 
