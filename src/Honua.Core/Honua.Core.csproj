@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <!-- Primary target framework with cross-platform capability -->
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <!-- Multi-targeting will be enabled once mobile workloads are available:
-         net10.0;net10.0-android;net10.0-ios;net10.0-maccatalyst -->
+         net9.0;net9.0-android;net9.0-ios;net9.0-maccatalyst -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Nullable>enable</Nullable>
